@@ -259,6 +259,15 @@
     button.addEventListener("click", () => openMatch(event));
     return button;
   }
+    async function getMatchDetails(matchId) {
+        const payload = await apiGet("/getEventDetails", {
+            id: matchId
+        });
+
+        console.log("Match details response:", payload);
+
+        return payload?.data?.event || null;
+    }
 
     async function openMatch(event) {
         // Stop polling a previously opened match
