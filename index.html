@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b1020">
+  <title>My LoL Esports Calendar</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="app-shell">
+    <header class="topbar">
+      <div>
+        <div class="kicker">MY LOL ESPORTS</div>
+        <h1>Match Calendar</h1>
+        <p class="subtitle">A personal calendar powered directly by the LoL Esports schedule API.</p>
+      </div>
+      <div class="month-controls">
+        <button id="prevMonth" class="icon-btn" type="button" aria-label="Previous month">←</button>
+        <button id="todayBtn" type="button">Today</button>
+        <button id="nextMonth" class="icon-btn" type="button" aria-label="Next month">→</button>
+      </div>
+    </header>
+
+    <section class="main-grid">
+      <aside class="filters">
+        <div class="filter-title">
+          <h2>Leagues</h2>
+          <span id="selectedCount">0 selected</span>
+        </div>
+
+        <input id="leagueSearch" type="search" placeholder="Search leagues…" autocomplete="off">
+
+        <div class="quick-buttons">
+          <button id="majorBtn" type="button">Major</button>
+          <button id="allBtn" type="button">All</button>
+          <button id="noneBtn" type="button">None</button>
+        </div>
+
+        <div id="leagueList" class="league-list" aria-label="League filters"></div>
+
+        <div class="tip">
+          Your league choices are saved in this browser.
+        </div>
+      </aside>
+
+      <section class="calendar-panel">
+        <div class="calendar-toolbar">
+          <div>
+            <div id="status" class="status" aria-live="polite">Loading leagues…</div>
+            <h2 id="monthTitle"></h2>
+          </div>
+          <div class="summary">
+            <strong id="matchCount">0 matches</strong>
+            <span id="timezone"></span>
+          </div>
+        </div>
+
+        <div class="calendar-scroll">
+          <div class="calendar-inner">
+            <div class="weekdays" aria-hidden="true">
+              <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span>
+              <span>Thu</span><span>Fri</span><span>Sat</span>
+            </div>
+            <div id="calendar" class="calendar"></div>
+          </div>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <dialog id="matchDialog">
+    <button id="closeDialog" class="dialog-close" type="button" aria-label="Close">×</button>
+    <div id="matchDetails"></div>
+  </dialog>
+
+  <script src="app.js"></script>
+</body>
+</html>
