@@ -7,6 +7,7 @@
   const MAX_PAGES_PER_LEAGUE = 45;
   const STORAGE_KEY = "lol-calendar-selected-leagues-v2";
 
+  let liveScoreTimer = null;
   const state = {
     leagues: [],
     selected: new Set(),
@@ -259,7 +260,13 @@
     return button;
   }
 
-    function openMatch(event) {
+    async function openMatch(event) {
+        // Stop polling a previously opened match
+        if (liveScoreTimer) {
+            clearInterval(liveScoreTimer);
+            liveScoreTimer = null;
+        }
+
         const teams = event?.match?.teams || [];
 
         const teamA =
@@ -276,27 +283,45 @@
 
         ui.matchDetails.replaceChildren();
 
+        // League
         const league = document.createElement("p");
         league.className = "detail-league";
         league.textContent = event?.league?.name || "League";
 
+        // Team names
         const teamsLine = document.createElement("div");
         teamsLine.className = "detail-teams";
         teamsLine.textContent = `${teamA} vs ${teamB}`;
 
+        // Score
+        const scoreLine = document.createElement("div");
+        scoreLine.className = "detail-score";
+        scoreLine.textContent = "Loading score…";
+
+        // Match status
+        const statusLine = document.createElement("div");
+        statusLine.className = "detail-status";
+
+        // Date
         const dateLine = document.createElement("p");
         dateLine.className = "detail-meta";
-        dateLine.textContent = time.toLocaleString();
 
-        const statusLine = document.createElement("p");
-        statusLine.className = "detail-meta";
-        statusLine.textContent = `Status: ${event?.state || "unknown"}`;
+        dateLine.textContent = new Intl.DateTimeFormat([], {
+            weekday: "long",
+            month: "long",
+            day: "numeric",
+            year: "numeric",
+            hour: "numeric",
+            minute: "2-digit",
+            timeZoneName: "short"
+        }).format(time);
 
         ui.matchDetails.append(
             league,
             teamsLine,
-            dateLine,
-            statusLine
+            scoreLine,
+            statusLine,
+            dateLine
         );
 
         const bestOf = event?.match?.strategy?.count;
@@ -309,6 +334,76 @@
         }
 
         ui.dialog.showModal();
+
+        async function updateScore() {
+            try {
+                const details = await getMatchDetails(event.match.id);
+
+                if (!details) {
+                    scoreLine.textContent = "Score unavailable";
+                    return;
+                }
+
+                const detailTeams = details?.match?.teams || [];
+
+                const scoreA =
+                    detailTeams[0]?.result?.gameWins ?? 0;
+
+                const scoreB =
+                    detailTeams[1]?.result?.gameWins ?? 0;
+
+                scoreLine.textContent =
+                    `${teamA} ${scoreA} — ${scoreB} ${teamB}`;
+
+                // Figure out whether the series has finished
+                const winTarget = bestOf
+                    ? Math.ceil(bestOf / 2)
+                    : null;
+
+                const isFinished =
+                    event.state === "completed" ||
+                    (winTarget &&
+                        (scoreA >= winTarget || scoreB >= winTarget));
+
+                if (isFinished) {
+                    statusLine.textContent = "FINAL";
+                    statusLine.className =
+                        "detail-status final";
+
+                    if (liveScoreTimer) {
+                        clearInterval(liveScoreTimer);
+                        liveScoreTimer = null;
+                    }
+
+                } else if (event.state === "inProgress") {
+                    statusLine.textContent = "● LIVE";
+                    statusLine.className =
+                        "detail-status live";
+
+                } else {
+                    statusLine.textContent = "UPCOMING";
+                    statusLine.className =
+                        "detail-status upcoming";
+                }
+
+            } catch (error) {
+                console.error("Could not load match score:", error);
+
+                scoreLine.textContent =
+                    "Score currently unavailable";
+            }
+        }
+
+        // Get the newest score immediately
+        await updateScore();
+
+        // If the match is live, refresh every 20 seconds
+        if (event.state === "inProgress") {
+            liveScoreTimer = setInterval(
+                updateScore,
+                20000
+            );
+        }
     }
     function openDayMatches(date, events) {
         ui.matchDetails.replaceChildren();
@@ -564,7 +659,16 @@
     renderLeagueList();
     loadSchedule();
   });
-  ui.dialogClose.addEventListener("click", () => ui.dialog.close());
+    ui.dialog.addEventListener("click", (event) => {
+        if (event.target === ui.dialog) {
+            ui.dialog.close();
+
+            if (liveScoreTimer) {
+                clearInterval(liveScoreTimer);
+                liveScoreTimer = null;
+            }
+        }
+    });
   ui.dialog.addEventListener("click", (event) => {
     if (event.target === ui.dialog) ui.dialog.close();
   });

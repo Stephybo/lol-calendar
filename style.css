@@ -621,7 +621,33 @@ dialog::backdrop {
 .detail-meta {
     color: var(--muted);
 }
+.detail-score {
+    margin: 22px 0 8px;
+    font-size: 1.6rem;
+    font-weight: 900;
+    text-align: center;
+    color: var(--text);
+}
 
+.detail-status {
+    margin-bottom: 18px;
+    text-align: center;
+    font-size: .8rem;
+    font-weight: 900;
+    letter-spacing: .12em;
+}
+
+.detail-status.live {
+    color: #ff6b6b;
+}
+
+.detail-status.final {
+    color: var(--muted);
+}
+
+.detail-status.upcoming {
+    color: var(--gold);
+}
 /* =========================================================
    "+ X MORE" BUTTON
    Shows when a day has more than 5 matches
