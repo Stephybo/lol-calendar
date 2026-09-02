@@ -5,12 +5,12 @@
    ========================================================= */
 :root {
   color-scheme: dark;
-  --bg: #070b14;
-  --panel: #0f1728;
+  --bg: #434171;
+  --panel: #603278;
   --panel-2: #986d90;
-  --card: #172641;
+  --card: #3a4e35;
   --border: #283956;
-  --text: #d8d0aa;
+  --text: rgb(133 239 130 / 0.69);
   --muted: #a7bf98;
   --gold: #ffffff;
   --cyan: #35d3c4;
@@ -777,4 +777,29 @@ dialog::backdrop {
   .summary {
       font-size: .82rem;
   }
+    .polymarket-container {
+        margin-top: 18px;
+        text-align: center;
+    }
+
+    .polymarket-link {
+        display: inline-block;
+        padding: 10px 16px;
+
+        border: 1px solid var(--border);
+        border-radius: 8px;
+
+        background: #18263f;
+        color: var(--text);
+
+        font-size: .8rem;
+        font-weight: 800;
+
+        text-decoration: none;
+    }
+
+    .polymarket-link:hover {
+        border-color: var(--gold);
+        color: var(--gold);
+    }
 }

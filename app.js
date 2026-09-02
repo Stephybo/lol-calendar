@@ -269,6 +269,392 @@
         return payload?.data?.event || null;
     }
 
+    async function findPolymarketMatch(
+        teamA,
+        teamB,
+        matchDate,
+        teamACode = "",
+        teamBCode = ""
+    ) {
+        try {
+            const normalize = (text) =>
+                String(text || "")
+                    .toLowerCase()
+                    .replace(/\besports\b/g, "")
+                    .replace(/\bgaming\b/g, "")
+                    .replace(/[^a-z0-9]/g, "");
+
+            // Some teams are named differently on Polymarket.
+            const knownAliases = {
+                "bnkfearx": ["bnkfearx", "fearx", "fox", "fox1"],
+                "dpluskia": ["dpluskia", "dplus", "dk"],
+                "hanwhalifeesports": ["hanwhalifeesports", "hanwhalife", "hle", "hle1"],
+                "hanwhalife": ["hanwhalife", "hle", "hle1"],
+                "geng": ["geng", "gen"],
+                "gengesports": ["geng", "gen"],
+                "ktrolster": ["ktrolster", "kt"],
+                "nongshimredforce": ["nongshimredforce", "nongshim", "ns"],
+                "drx": ["drx"],
+                "t1": ["t1"]
+            };
+
+            function getAliases(name, code) {
+                const normalizedName = normalize(name);
+                const normalizedCode = normalize(code);
+
+                const result = new Set();
+
+                if (normalizedName) {
+                    result.add(normalizedName);
+                }
+
+                if (normalizedCode) {
+                    result.add(normalizedCode);
+                }
+
+                const extras = knownAliases[normalizedName];
+
+                if (extras) {
+                    for (const alias of extras) {
+                        result.add(normalize(alias));
+                    }
+                }
+
+                return [...result].filter(Boolean);
+            }
+
+            const aliasesA = getAliases(
+                teamA,
+                teamACode
+            );
+
+            const aliasesB = getAliases(
+                teamB,
+                teamBCode
+            );
+
+            /*
+             * Polymarket does not always index a match using
+             * the same team names Riot uses.
+             *
+             * Search several combinations.
+             */
+            const searches = new Set();
+
+            searches.add(`${teamA} ${teamB}`);
+
+            if (teamACode && teamBCode) {
+                searches.add(
+                    `${teamACode} ${teamBCode}`
+                );
+            }
+
+            for (const a of aliasesA) {
+                for (const b of aliasesB) {
+                    searches.add(`${a} ${b}`);
+                }
+            }
+
+            const foundEvents = new Map();
+
+            for (const query of searches) {
+                try {
+                    const url = new URL(
+                        "https://gamma-api.polymarket.com/public-search"
+                    );
+
+                    url.searchParams.set(
+                        "q",
+                        query
+                    );
+
+                    const response =
+                        await fetch(url);
+
+                    if (!response.ok) {
+                        console.warn(
+                            "Polymarket search failed:",
+                            response.status,
+                            query
+                        );
+
+                        continue;
+                    }
+
+                    const data =
+                        await response.json();
+
+                    /*
+                     * Different versions of the endpoint have
+                     * returned events in slightly different places.
+                     */
+                    const events =
+                        data?.events ||
+                        data?.results?.events ||
+                        [];
+
+                    for (const item of events) {
+                        if (item?.slug) {
+                            foundEvents.set(
+                                item.slug,
+                                item
+                            );
+                        }
+                    }
+
+                } catch (error) {
+                    console.warn(
+                        "Polymarket search failed for:",
+                        query,
+                        error
+                    );
+                }
+            }
+
+            console.log(
+                "Polymarket events found:",
+                [...foundEvents.values()]
+            );
+
+            if (!foundEvents.size) {
+                return null;
+            }
+
+            /*
+             * Check whether both teams occur somewhere in
+             * the Polymarket event.
+             */
+            const candidates =
+                [...foundEvents.values()]
+                    .filter((item) => {
+
+                        const text = normalize(
+                            [
+                                item?.title,
+                                item?.question,
+                                item?.slug,
+                                item?.description
+                            ]
+                                .filter(Boolean)
+                                .join(" ")
+                        );
+
+                        const hasTeamA =
+                            aliasesA.some(
+                                (alias) =>
+                                    text.includes(alias)
+                            );
+
+                        const hasTeamB =
+                            aliasesB.some(
+                                (alias) =>
+                                    text.includes(alias)
+                            );
+
+                        return (
+                            hasTeamA &&
+                            hasTeamB
+                        );
+                    });
+
+            console.log(
+                "Polymarket team candidates:",
+                candidates
+            );
+
+            if (!candidates.length) {
+                return null;
+            }
+
+            /*
+             * Riot gives us the match start time.
+             *
+             * Prefer a Polymarket event whose date is
+             * closest to the Riot match.
+             */
+            const riotTime =
+                new Date(matchDate).getTime();
+
+            const scoredCandidates =
+                candidates.map((item) => {
+
+                    const possibleDates = [
+                        item?.startDate,
+                        item?.endDate,
+                        item?.start_date,
+                        item?.end_date,
+                        item?.createdAt
+                    ];
+
+                    let closestDifference =
+                        Infinity;
+
+                    for (const value of possibleDates) {
+
+                        if (!value) {
+                            continue;
+                        }
+
+                        const marketTime =
+                            new Date(value).getTime();
+
+                        if (
+                            !Number.isFinite(
+                                marketTime
+                            )
+                        ) {
+                            continue;
+                        }
+
+                        const difference =
+                            Math.abs(
+                                marketTime -
+                                riotTime
+                            );
+
+                        if (
+                            difference <
+                            closestDifference
+                        ) {
+                            closestDifference =
+                                difference;
+                        }
+                    }
+
+                    /*
+                     * Polymarket esports slugs often contain
+                     * YYYY-MM-DD. This is more useful than
+                     * createdAt when available.
+                     */
+                    const slugDateMatch =
+                        String(item?.slug || "")
+                            .match(
+                                /(\d{4}-\d{2}-\d{2})/
+                            );
+
+                    if (slugDateMatch) {
+
+                        const slugTime =
+                            new Date(
+                                slugDateMatch[1] +
+                                "T12:00:00"
+                            ).getTime();
+
+                        if (
+                            Number.isFinite(
+                                slugTime
+                            )
+                        ) {
+                            const difference =
+                                Math.abs(
+                                    slugTime -
+                                    riotTime
+                                );
+
+                            if (
+                                difference <
+                                closestDifference
+                            ) {
+                                closestDifference =
+                                    difference;
+                            }
+                        }
+                    }
+
+                    return {
+                        item,
+                        difference:
+                        closestDifference
+                    };
+                });
+
+            scoredCandidates.sort(
+                (a, b) =>
+                    a.difference -
+                    b.difference
+            );
+
+            console.log(
+                "Polymarket scored candidates:",
+                scoredCandidates
+            );
+
+            const best =
+                scoredCandidates[0];
+
+            if (!best?.item?.slug) {
+                return null;
+            }
+
+            /*
+             * Do not accidentally link an old meeting between
+             * the same two teams.
+             *
+             * If Polymarket supplied usable date information,
+             * require it to be within 3 days.
+             */
+            const THREE_DAYS =
+                3 *
+                24 *
+                60 *
+                60 *
+                1000;
+
+            if (
+                Number.isFinite(
+                    best.difference
+                ) &&
+                best.difference >
+                THREE_DAYS
+            ) {
+                console.log(
+                    "Ignoring old Polymarket event:",
+                    best.item
+                );
+
+                return null;
+            }
+
+            /*
+             * IMPORTANT:
+             *
+             * Do NOT hardcode /lck/, /lpl/, etc.
+             *
+             * The generic event URL works regardless
+             * of which LoL league the match belongs to.
+             */
+            const polymarketUrl =
+                `https://polymarket.com/event/${best.item.slug}`;
+
+            console.log(
+                "Polymarket match selected:",
+                best.item
+            );
+
+            console.log(
+                "Polymarket URL:",
+                polymarketUrl
+            );
+
+            return {
+                title:
+                    best.item.title ||
+                    best.item.question ||
+                    `${teamA} vs ${teamB}`,
+
+                url: polymarketUrl
+            };
+
+        } catch (error) {
+
+            console.error(
+                "Could not find Polymarket match:",
+                error
+            );
+
+            return null;
+        }
+    }
     async function openMatch(event) {
         // Stop polling a previously opened match
         if (liveScoreTimer) {
@@ -324,13 +710,18 @@
             minute: "2-digit",
             timeZoneName: "short"
         }).format(time);
+        const polymarketContainer =
+            document.createElement("div");
 
+        polymarketContainer.className =
+            "polymarket-container";
         ui.matchDetails.append(
             league,
             teamsLine,
             scoreLine,
             statusLine,
-            dateLine
+            dateLine,
+            polymarketContainer
         );
 
         const bestOf = event?.match?.strategy?.count;
@@ -343,7 +734,44 @@
         }
 
         ui.dialog.showModal();
+        const polymarketMatch =
+            await findPolymarketMatch(
+                teamA,
+                teamB,
+                event.startTime,
+                teams[0]?.code || "",
+                teams[1]?.code || ""
+            );
 
+
+// ADD POLYMARKET BUTTON
+        if (polymarketMatch) {
+
+            const polymarketLink =
+                document.createElement("button");
+
+            polymarketLink.type = "button";
+            polymarketLink.className =
+                "polymarket-link";
+
+            polymarketLink.textContent =
+                "View on Polymarket ↗";
+
+            polymarketLink.addEventListener(
+                "click",
+                () => {
+                    window.open(
+                        polymarketMatch.url,
+                        "_blank",
+                        "noopener,noreferrer"
+                    );
+                }
+            );
+
+            polymarketContainer.append(
+                polymarketLink
+            );
+        }
         async function updateScore() {
             try {
                 const details = await getMatchDetails(event.match.id);
