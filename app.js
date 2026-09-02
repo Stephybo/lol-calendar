@@ -398,8 +398,24 @@
             } catch (error) {
                 console.error("Could not load match score:", error);
 
-                scoreLine.textContent =
-                    "Score currently unavailable";
+                const scheduleTeams = event?.match?.teams || [];
+
+                const scoreA =
+                    scheduleTeams[0]?.result?.gameWins;
+
+                const scoreB =
+                    scheduleTeams[1]?.result?.gameWins;
+
+                if (
+                    typeof scoreA === "number" &&
+                    typeof scoreB === "number"
+                ) {
+                    scoreLine.textContent =
+                        `${teamA} ${scoreA} — ${scoreB} ${teamB}`;
+                } else {
+                    scoreLine.textContent =
+                        "Score currently unavailable";
+                }
             }
         }
 
