@@ -390,6 +390,7 @@ h1 {
     /* HEIGHT OF EACH CALENDAR DAY */
   min-height: 145px;
   min-width: 0;
+    overflow: hidden;
     /* Space inside each day */
   padding: 8px;
     /* CALENDAR GRID LINES */
@@ -467,18 +468,15 @@ h1 {
    LCK
    ========================================================= */
 
+/* Keep each match card inside its calendar cell */
 .match {
     width: 100%;
-    min-height: 0;
+    min-width: 0;
+    overflow: hidden;
 
-    /* SPACE INSIDE MATCH CARD */
     padding: 7px;
     text-align: left;
-
-    /* MATCH CARD BACKGROUND */
     background: var(--card);
-
-    /* MATCH CARD ROUNDNESS */
     border-radius: 8px;
 }
 /* =========================================================
@@ -512,9 +510,18 @@ h1 {
    TEAM NAMES
    Example: "T1 vs Gen.G"
    ========================================================= */
+/* Make team names shrink instead of overflowing */
 .match .teams {
+    display: block;
+
+    min-width: 0;
+    width: 100%;
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
     margin-top: 2px;
-    /* TEAM NAME SIZE */
     font-size: .75rem;
 }
 
@@ -522,12 +529,19 @@ h1 {
    LEAGUE NAME UNDER MATCH
    Example: "LCK"
    ========================================================= */
+/* Same idea for league name */
 .match .league {
-    margin-top: 2px;
-    /* LEAGUE NAME COLOR */
-    color: var(--muted);
+    display: block;
 
-    /* LEAGUE NAME SIZE */
+    min-width: 0;
+    width: 100%;
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    margin-top: 2px;
+    color: var(--muted);
     font-size: .63rem;
 }
 
@@ -607,6 +621,95 @@ dialog::backdrop {
 .detail-meta {
     color: var(--muted);
 }
+
+/* =========================================================
+   "+ X MORE" BUTTON
+   Shows when a day has more than 5 matches
+   ========================================================= */
+
+.more {
+    width: 100%;
+    min-height: 28px;
+
+    padding: 4px 6px;
+
+    background: transparent;
+    border: 0;
+
+    color: var(--muted);
+
+    font-size: .68rem;
+    text-align: left;
+
+    cursor: pointer;
+}
+
+.more:hover {
+    color: var(--gold);
+    text-decoration: underline;
+}
+
+
+/* =========================================================
+   ALL MATCHES POPUP
+   Appears after clicking "+ X more"
+   ========================================================= */
+
+.day-match-list {
+    display: grid;
+    gap: 8px;
+
+    margin-top: 15px;
+
+    /* If there are A LOT of matches */
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+
+/* Individual match inside the popup */
+.day-match-item {
+    width: 100%;
+
+    display: grid;
+    grid-template-columns: 75px minmax(0, 1fr);
+    gap: 3px 10px;
+
+    padding: 12px;
+
+    background: var(--card);
+
+    border: 1px solid var(--border);
+    border-radius: 10px;
+
+    text-align: left;
+}
+
+
+/* Time inside match list */
+.day-match-time {
+    grid-row: 1 / 3;
+
+    color: var(--gold);
+
+    font-weight: 900;
+}
+
+
+/* Team names */
+.day-match-item strong {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+
+/* League name */
+.day-match-league {
+    color: var(--muted);
+
+    font-size: .75rem;
+}
+
 /* =========================================================
    TABLET / SMALL SCREEN LAYOUT
    Activates when screen is 900px wide or smaller

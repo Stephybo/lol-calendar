@@ -259,42 +259,139 @@
     return button;
   }
 
-  function openMatch(event) {
-    const teams = event?.match?.teams || [];
-    const a = teams[0]?.name || teams[0]?.code || "TBD";
-    const b = teams[1]?.name || teams[1]?.code || "TBD";
-    const d = new Date(event.startTime);
+    function openMatch(event) {
+        const teams = event?.match?.teams || [];
 
-    ui.matchDetails.replaceChildren();
+        const teamA =
+            teams[0]?.name ||
+            teams[0]?.code ||
+            "TBD";
 
-    const league = document.createElement("p");
-    league.className = "detail-league";
-    league.textContent = event?.league?.name || "League";
+        const teamB =
+            teams[1]?.name ||
+            teams[1]?.code ||
+            "TBD";
 
-    const teamsLine = document.createElement("div");
-    teamsLine.className = "detail-teams";
-    teamsLine.textContent = `${a} vs ${b}`;
+        const time = new Date(event.startTime);
 
-    const time = document.createElement("p");
-    time.className = "detail-meta";
-    time.textContent = d.toLocaleString();
+        ui.matchDetails.replaceChildren();
 
-    const stateLine = document.createElement("p");
-    stateLine.className = "detail-meta";
-    stateLine.textContent = `Status: ${event?.state || "unknown"}`;
+        const league = document.createElement("p");
+        league.className = "detail-league";
+        league.textContent = event?.league?.name || "League";
 
-    ui.matchDetails.append(league, teamsLine, time, stateLine);
+        const teamsLine = document.createElement("div");
+        teamsLine.className = "detail-teams";
+        teamsLine.textContent = `${teamA} vs ${teamB}`;
 
-    const bestOf = event?.match?.strategy?.count;
-    if (bestOf) {
-      const strategy = document.createElement("p");
-      strategy.className = "detail-meta";
-      strategy.textContent = `Best of ${bestOf}`;
-      ui.matchDetails.append(strategy);
+        const dateLine = document.createElement("p");
+        dateLine.className = "detail-meta";
+        dateLine.textContent = time.toLocaleString();
+
+        const statusLine = document.createElement("p");
+        statusLine.className = "detail-meta";
+        statusLine.textContent = `Status: ${event?.state || "unknown"}`;
+
+        ui.matchDetails.append(
+            league,
+            teamsLine,
+            dateLine,
+            statusLine
+        );
+
+        const bestOf = event?.match?.strategy?.count;
+
+        if (bestOf) {
+            const strategy = document.createElement("p");
+            strategy.className = "detail-meta";
+            strategy.textContent = `Best of ${bestOf}`;
+            ui.matchDetails.append(strategy);
+        }
+
+        ui.dialog.showModal();
     }
+    function openDayMatches(date, events) {
+        ui.matchDetails.replaceChildren();
 
-    ui.dialog.showModal();
-  }
+        // Date title
+        const title = document.createElement("div");
+        title.className = "detail-teams";
+        title.textContent = date.toLocaleDateString([], {
+            weekday: "long",
+            month: "long",
+            day: "numeric",
+            year: "numeric"
+        });
+
+        const count = document.createElement("p");
+        count.className = "detail-meta";
+        count.textContent = `${events.length} matches`;
+
+        const list = document.createElement("div");
+        list.className = "day-match-list";
+
+        // Make sure matches are ordered by time
+        const sortedEvents = [...events].sort(
+            (a, b) => new Date(a.startTime) - new Date(b.startTime)
+        );
+
+        for (const event of sortedEvents) {
+            const teams = event?.match?.teams || [];
+
+            const teamA =
+                teams[0]?.name ||
+                teams[0]?.code ||
+                "TBD";
+
+            const teamB =
+                teams[1]?.name ||
+                teams[1]?.code ||
+                "TBD";
+
+            const time = new Date(event.startTime);
+
+            const match = document.createElement("button");
+
+            match.type = "button";
+            match.className = "day-match-item";
+
+            match.innerHTML = `
+      <span class="day-match-time">
+        ${time.toLocaleTimeString([], {
+                hour: "numeric",
+                minute: "2-digit"
+            })}
+      </span>
+
+      <strong>
+        ${teamA} vs ${teamB}
+      </strong>
+
+      <span class="day-match-league">
+        ${event?.league?.name || "League"}
+      </span>
+    `;
+
+            // Clicking an individual match opens its normal details
+            match.addEventListener("click", () => {
+                ui.dialog.close();
+
+                setTimeout(() => {
+                    openMatch(event);
+                }, 0);
+            });
+
+            list.append(match);
+        }
+
+        ui.matchDetails.append(
+            title,
+            count,
+            list
+        );
+
+        ui.dialog.showModal();
+    }
 
   function renderCalendar() {
     const y = state.month.getFullYear();
@@ -338,12 +435,18 @@
       const events = byDay.get(localDateKey(date)) || [];
 
       for (const event of events.slice(0, 5)) matches.append(matchButton(event));
-      if (events.length > 5) {
-        const more = document.createElement("div");
-        more.className = "more";
-        more.textContent = `+${events.length - 5} more`;
-        matches.append(more);
-      }
+        if (events.length > 5) {
+            const more = document.createElement("button");
+            more.type = "button";
+            more.className = "more";
+            more.textContent = `+${events.length - 5} more`;
+
+            more.addEventListener("click", () => {
+                openDayMatches(date, events);
+            });
+
+            matches.append(more);
+        }
 
       day.append(matches);
       ui.calendar.append(day);
