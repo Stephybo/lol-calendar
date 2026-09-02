@@ -71,10 +71,18 @@
 </main>
 
 <dialog id="matchDialog">
-    <button id="closeDialog" class="dialog-close" type="button" aria-label="Close">×</button>
+    <button
+            id="closeDialog"
+            type="button"
+            aria-label="Close"
+            onclick="document.getElementById('matchDialog').close()"
+    >
+        ×
+    </button>
+
     <div id="matchDetails"></div>
 </dialog>
 
-<script src="app.js?v=3"></script>
+<script src="app.js?v=4"></script>
 </body>
 </html>
