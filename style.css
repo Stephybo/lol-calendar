@@ -1,4 +1,8 @@
 * { box-sizing: border-box; }
+/* =========================================================
+   MAIN COLOR PALETTE
+   CHANGE THESE FIRST if you want to recolor the whole site
+   ========================================================= */
 :root {
   color-scheme: dark;
   --bg: #070b14;
@@ -6,12 +10,15 @@
   --panel-2: #131f34;
   --card: #172641;
   --border: #283956;
-  --text: #f5f7fb;
-  --muted: #98a8bf;
-  --gold: #cfa94d;
+  --text: #d8d0aa;
+  --muted: #a7bf98;
+  --gold: #ffffff;
   --cyan: #35d3c4;
   --danger: #ff7f8c;
 }
+/* =========================================================
+   WHOLE WEBPAGE
+   ========================================================= */
 html { min-width: 320px; }
 body {
   margin: 0;
@@ -22,118 +29,623 @@ body {
     var(--bg);
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
+/* =========================================================
+   ALL BUTTONS + INPUTS
+   ========================================================= */
 button, input { font: inherit; }
+
+/* =========================================================
+   ALL BUTTONS
+   Previous / Today / Next / Major / All / None etc.
+   ========================================================= */
 button {
   border: 1px solid var(--border);
+  /* BUTTON BACKGROUND */
   background: #18263f;
-  color: var(--text);
-  border-radius: 10px;
+  /* BUTTON TEXT */
+  color: var(--text);   
+  /* ROUNDNESS OF BUTTONS */
+  border-radius: 10px;   
   min-height: 42px;
+  /* Space inside button */
   padding: 9px 13px;
   cursor: pointer;
 }
-button:hover { border-color: var(--gold); }
-button:focus-visible, input:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
-button:disabled { opacity: .5; cursor: wait; }
+/* Button border when mouse is over it */
+button:hover {
+    border-color: var(--gold);
+}
+/* Outline when navigating with keyboard */
+button:focus-visible, input:focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 2px;
+}
+/* Disabled/loading buttons */
+button:disabled {
+    opacity: .5;
+    cursor: wait;
+}
+
+/* =========================================================
+   LEAGUE SEARCH BOX
+   ========================================================= */
 input[type="search"] {
   width: 100%;
   min-height: 44px;
+  /* SEARCH BOX BORDER */
   border: 1px solid var(--border);
+  /* SEARCH BOX BACKGROUND */
   background: #0a1221;
+  /* SEARCH BOX TEXT */
   color: var(--text);
   border-radius: 10px;
   padding: 10px 12px;
 }
-.app-shell { width: min(1500px, calc(100% - 28px)); margin: 0 auto; padding: 28px 0 48px; }
-.topbar, .calendar-toolbar, .filter-title {
+/* =========================================================
+   ENTIRE APP WIDTH
+   Controls how wide the whole calendar can get
+   ========================================================= */
+
+.app-shell {
+  /* 1500px = maximum website width */
+  width: min(1500px, calc(100% - 28px));
+  /* Centers website */
+  margin: 0 auto;
+  /* Top / bottom spacing */
+  padding: 28px 0 48px; }
+
+/* =========================================================
+   SHARED FLEX LAYOUTS
+   Used for header + calendar header + league header
+   ========================================================= */
+.topbar,
+.calendar-toolbar,
+.filter-title {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
 }
-.kicker { color: var(--gold); font-size: .72rem; font-weight: 900; letter-spacing: .18em; }
-h1 { margin: 4px 0 0; font-size: clamp(2rem, 4.5vw, 4rem); line-height: 1; }
-.subtitle { color: var(--muted); margin: 10px 0 0; }
-.month-controls, .quick-buttons { display: flex; gap: 8px; }
-.icon-btn { width: 44px; padding-inline: 0; font-size: 1.1rem; }
-.main-grid { display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: 16px; margin-top: 24px; }
-.filters, .calendar-panel {
+/* =========================================================
+   "MY LOL ESPORTS" TEXT ABOVE TITLE
+   ========================================================= */
+.kicker { color: var(--gold);
+  font-size: .72rem;
+  font-weight: 900;
+  letter-spacing: .18em; }
+
+/* =========================================================
+   MAIN "MATCH CALENDAR" TITLE
+   ========================================================= */
+h1 {
+  /* MAIN TITLE SIZE */
+  margin: 4px 0 0;
+  font-size: clamp(2rem, 4.5vw, 4rem);
+  line-height: 1; }
+
+/* =========================================================
+   TEXT UNDER "MATCH CALENDAR"
+   ========================================================= */
+.subtitle {
+  color: var(--muted);
+  margin: 10px 0 0; }
+
+/* =========================================================
+   MONTH NAVIGATION BUTTONS
+   ← Today →
+
+   ALSO controls Major / All / None button row
+   ========================================================= */
+.month-controls,
+.quick-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+
+/* Previous / Next arrow buttons */
+.icon-btn {
+  width: 44px;
+  padding-inline: 0;
+  font-size: 1.1rem; }
+
+/* =========================================================
+   MAIN PAGE LAYOUT
+   LEFT = League sidebar
+   RIGHT = Calendar
+
+   250px controls sidebar width
+   ========================================================= */
+.main-grid {
+  display: grid;
+  /* CHANGE 250px TO MAKE SIDEBAR WIDER/NARROWER */
+  grid-template-columns: 250px minmax(0, 1fr);
+  /* Space between sidebar and calendar */
+  gap: 16px;
+  margin-top: 24px;
+}
+
+/* =========================================================
+   SIDEBAR + CALENDAR CONTAINERS
+   ========================================================= */
+.filters,
+.calendar-panel {
+  /* MAIN PANEL BACKGROUND */
   background: rgba(15, 23, 40, .96);
+  /* PANEL BORDER */
   border: 1px solid var(--border);
+  /* PANEL ROUNDNESS */
   border-radius: 18px;
 }
-.filters { align-self: start; padding: 15px; }
-.filter-title h2 { margin: 0; font-size: 1rem; }
-.filter-title span, .status, #timezone, .tip { color: var(--muted); }
-.quick-buttons { margin: 10px 0; flex-wrap: wrap; }
-.quick-buttons button { min-height: 36px; padding: 7px 10px; font-size: .78rem; }
-.league-list { display: grid; gap: 3px; max-height: 600px; overflow-y: auto; padding-right: 3px; }
-.league-row {
-  display: flex; align-items: center; gap: 9px;
-  min-width: 0; padding: 8px; border-radius: 9px; cursor: pointer;
+
+/* =========================================================
+   LEAGUE SIDEBAR
+   ========================================================= */
+.filters {
+  align-self: start;
+/* Space inside sidebar */
+  padding: 15px;
 }
-.league-row:hover { background: var(--panel-2); }
-.league-row input { margin: 0; flex: none; }
-.league-row span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .82rem; }
-.tip { border-top: 1px solid var(--border); margin-top: 12px; padding-top: 12px; font-size: .72rem; line-height: 1.45; }
-.calendar-panel { min-width: 0; overflow: hidden; }
-.calendar-toolbar { min-height: 85px; padding: 16px 18px; border-bottom: 1px solid var(--border); }
-.calendar-toolbar h2 { margin: 3px 0 0; font-size: 1.55rem; }
-.status { font-size: .8rem; }
-.status.error { color: var(--danger); }
-.summary { text-align: right; display: grid; gap: 3px; }
-.summary strong { color: var(--cyan); }
-.summary span { font-size: .72rem; }
-.calendar-scroll { overflow-x: auto; }
-.calendar-inner { min-width: 790px; }
-.weekdays, .calendar { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); }
-.weekdays { color: var(--muted); border-bottom: 1px solid var(--border); }
-.weekdays span { padding: 10px; text-align: right; font-size: .7rem; font-weight: 800; }
+/* "Leagues" heading */
+.filter-title h2 {
+  margin: 0;
+  font-size: 1rem;
+}
+/* =========================================================
+   DIM / SECONDARY TEXT
+
+   Controls:
+   - "X selected"
+   - API status
+   - timezone
+   - sidebar tip
+   ========================================================= */
+.filter-title span,
+.status,
+#timezone,
+.tip {
+    color: var(--muted);
+}
+/* =========================================================
+   MAJOR / ALL / NONE BUTTON ROW
+   ========================================================= */
+.quick-buttons {
+    margin: 10px 0;
+    flex-wrap: wrap;
+}
+.quick-buttons button {
+    min-height: 36px;
+    padding: 7px 10px;
+    font-size: .78rem;
+}
+
+/* =========================================================
+   SCROLLABLE LEAGUE LIST
+   ========================================================= */
+.league-list {
+    display: grid;
+    /* Space between leagues */
+    gap: 3px;
+
+    /* MAX HEIGHT BEFORE LIST SCROLLS */
+    max-height: 600px;
+    overflow-y: auto;
+    padding-right: 3px;
+}
+/* =========================================================
+   EACH INDIVIDUAL LEAGUE
+   Checkbox + league name
+   ========================================================= */
+.league-row {
+  display: flex;
+    align-items: center;
+    /* Space between checkbox and league name */
+    gap: 9px;
+  min-width: 0;
+    /* Space around each league */
+    padding: 8px;
+    border-radius: 9px;
+    cursor: pointer;
+}
+/* League background when hovering */
+.league-row:hover {
+    background: var(--panel-2);
+}
+
+/* League checkbox */
+.league-row input {
+    margin: 0;
+    flex: none;
+}
+
+/* League name text */
+.league-row span {
+    min-width: 0;
+
+    /* Prevent really long league names from breaking layout */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    /* LEAGUE NAME SIZE */
+    font-size: .82rem;
+}
+/* =========================================================
+   "Your league choices are saved..." TIP
+   ========================================================= */
+
+.tip {
+    border-top: 1px solid var(--border);
+    margin-top: 12px;
+    padding-top: 12px;
+    font-size: .72rem;
+    line-height: 1.45;
+}
+/* =========================================================
+   MAIN CALENDAR CONTAINER
+   ========================================================= */
+.calendar-panel {
+    min-width: 0;
+    overflow: hidden;
+}
+
+/* =========================================================
+   CALENDAR HEADER
+
+   Contains:
+   API pages checked
+   September 2026
+   match count
+   timezone
+   ========================================================= */
+.calendar-toolbar {
+    /* HEIGHT OF CALENDAR HEADER */
+    min-height: 85px;
+
+    /* Space inside header */
+    padding: 16px 18px;
+    border-bottom: 1px solid var(--border);
+}
+/* =========================================================
+   MONTH NAME
+   Example: "September 2026"
+   ========================================================= */
+.calendar-toolbar h2 {
+    margin: 3px 0 0;
+
+    /* MONTH TITLE SIZE */
+    font-size: 1.55rem;
+}
+.status {
+    font-size: .8rem;
+}
+/* API ERROR TEXT */
+.status.error {
+    color: var(--danger);
+}
+
+/* =========================================================
+   RIGHT SIDE OF CALENDAR HEADER
+   Match count + timezone
+   ========================================================= */
+
+.summary {
+    text-align: right;
+    display: grid;
+    gap: 3px; }
+
+/* "12 matches" COLOR */
+.summary strong {
+    color: var(--cyan);
+}
+
+/* TIMEZONE TEXT SIZE */
+.summary span {
+    font-size: .72rem;
+}
+/* =========================================================
+   CALENDAR HORIZONTAL SCROLLING
+   Mostly important on phones
+   ========================================================= */
+
+.calendar-scroll {
+    overflow-x: auto;
+}
+
+/* Minimum calendar width before scrolling */
+.calendar-inner {
+    min-width: 790px;
+}
+/* =========================================================
+   7-COLUMN CALENDAR GRID
+   ========================================================= */
+.weekdays,
+.calendar {
+    display: grid;
+    /* Seven equal columns */
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+/* =========================================================
+   SUN / MON / TUE / WED / THU / FRI / SAT ROW
+   ========================================================= */
+.weekdays {
+    /* WEEKDAY TEXT COLOR */
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+}
+.weekdays span {
+    padding: 10px;
+    text-align: right;
+
+    /* WEEKDAY TEXT SIZE */
+    font-size: .7rem;
+    font-weight: 800;
+}
+/* =========================================================
+   INDIVIDUAL CALENDAR DAY BOX
+   ========================================================= */
+
 .day {
+    /* HEIGHT OF EACH CALENDAR DAY */
   min-height: 145px;
   min-width: 0;
+    /* Space inside each day */
   padding: 8px;
+    /* CALENDAR GRID LINES */
   border-right: 1px solid var(--border);
   border-bottom: 1px solid var(--border);
 }
-.day:nth-child(7n) { border-right: 0; }
-.day.outside { opacity: .32; }
-.day.today { background: rgba(207, 169, 77, .07); }
-.day-number { text-align: right; font-weight: 900; font-size: .8rem; margin-bottom: 6px; }
+/* Remove unnecessary border from Saturday */
+.day:nth-child(7n) {
+    border-right: 0;
+}
+/* =========================================================
+   DAYS OUTSIDE CURRENT MONTH
+
+   Example:
+   August 30/31 showing in September calendar
+   ========================================================= */
+.day.outside {
+    /* LOWER = more faded */
+    opacity: .32;
+}
+/* =========================================================
+   TODAY'S CALENDAR BOX
+   ========================================================= */
+.day.today {
+    /* BACKGROUND HIGHLIGHT FOR TODAY */
+    background: rgba(207, 169, 77, .07);
+}
+/* =========================================================
+   DAY NUMBER
+   Example: 1, 2, 3, 4...
+   ========================================================= */
+.day-number {
+    text-align: right;
+    font-weight: 900;
+
+    /* DAY NUMBER SIZE */
+    font-size: .8rem;
+    margin-bottom: 6px;
+}
+/* =========================================================
+   CIRCLE AROUND TODAY'S NUMBER
+   ========================================================= */
 .day.today .day-number span {
-  display: inline-grid; place-items: center;
-  width: 27px; height: 27px; border-radius: 50%;
-  background: var(--gold); color: #111;
+    display: inline-grid;
+    place-items: center;
+
+    /* TODAY CIRCLE SIZE */
+    width: 27px;
+    height: 27px;
+
+    /* 50% = perfect circle */
+    border-radius: 50%;
+
+    /* TODAY CIRCLE BACKGROUND */
+    background: var(--gold);
+
+    /* TODAY NUMBER TEXT COLOR */
+    color: #111;
 }
-.matches { display: grid; gap: 5px; }
+
+/* =========================================================
+   LIST OF MATCHES INSIDE A DAY
+   ========================================================= */
+.matches {
+    display: grid;
+    /* SPACE BETWEEN MATCH CARDS */
+    gap: 5px;
+}
+/* =========================================================
+   INDIVIDUAL MATCH CARD
+   Example:
+
+   3:00 PM
+   T1 vs Gen.G
+   LCK
+   ========================================================= */
+
 .match {
-  width: 100%; min-height: 0; padding: 7px;
-  text-align: left; background: var(--card); border-radius: 8px;
+    width: 100%;
+    min-height: 0;
+
+    /* SPACE INSIDE MATCH CARD */
+    padding: 7px;
+    text-align: left;
+
+    /* MATCH CARD BACKGROUND */
+    background: var(--card);
+
+    /* MATCH CARD ROUNDNESS */
+    border-radius: 8px;
 }
-.match .time { display: block; color: var(--gold); font-size: .68rem; font-weight: 900; }
+/* =========================================================
+   MATCH TIME
+   Example: "3:00 PM"
+   ========================================================= */
+
+.match .time {
+    display: block;
+    /* MATCH TIME COLOR */
+    color: var(--gold);
+    /* MATCH TIME SIZE */
+    font-size: .68rem;
+    font-weight: 900;
+}
+/* =========================================================
+   TEAM NAMES + LEAGUE NAME
+
+   Prevents long names from overflowing
+   ========================================================= */
+
 .match .teams, .match .league {
-  display: block; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  display: block;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
-.match .teams { margin-top: 2px; font-size: .75rem; }
-.match .league { margin-top: 2px; color: var(--muted); font-size: .63rem; }
-.more { color: var(--muted); font-size: .68rem; padding: 2px; }
+
+/* =========================================================
+   TEAM NAMES
+   Example: "T1 vs Gen.G"
+   ========================================================= */
+.match .teams {
+    margin-top: 2px;
+    /* TEAM NAME SIZE */
+    font-size: .75rem;
+}
+
+/* =========================================================
+   LEAGUE NAME UNDER MATCH
+   Example: "LCK"
+   ========================================================= */
+.match .league {
+    margin-top: 2px;
+    /* LEAGUE NAME COLOR */
+    color: var(--muted);
+
+    /* LEAGUE NAME SIZE */
+    font-size: .63rem;
+}
+
+/* =========================================================
+   "+3 MORE" TEXT
+   When too many matches are on one day
+   ========================================================= */
+.more {
+    color: var(--muted);
+    font-size: .68rem;
+    padding: 2px;
+}
+
+/* =========================================================
+   MATCH DETAILS POPUP
+   Opens when you click a match
+   ========================================================= */
 dialog {
+    /* POPUP WIDTH */
   width: min(520px, calc(100% - 30px));
-  background: var(--panel); color: var(--text);
-  border: 1px solid var(--border); border-radius: 16px; padding: 22px;
+
+    /* POPUP BACKGROUND */
+    background: var(--panel);
+
+    /* POPUP TEXT */
+    color: var(--text);
+    /* POPUP BORDER */
+    border: 1px solid var(--border);
+    /* POPUP ROUNDNESS */
+    border-radius: 16px;
+    /* SPACE INSIDE POPUP */
+    padding: 22px;
 }
-dialog::backdrop { background: rgba(0,0,0,.72); }
-.dialog-close { float: right; width: 42px; padding: 0; font-size: 1.3rem; }
-.detail-league { color: var(--gold); font-weight: 900; }
-.detail-teams { font-size: 1.45rem; font-weight: 900; margin: 10px 0; padding-right: 45px; }
-.detail-meta { color: var(--muted); }
+
+/* =========================================================
+   DARK BACKGROUND BEHIND POPUP
+   ========================================================= */
+
+dialog::backdrop {
+    /* .72 = darkness/opacity */
+    background: rgba(0,0,0,.72);
+}
+
+/* =========================================================
+   POPUP X / CLOSE BUTTON
+   ========================================================= */
+
+.dialog-close {
+    float: right;
+    width: 42px;
+    padding: 0;
+    font-size: 1.3rem;
+}
+
+/* =========================================================
+   LEAGUE NAME INSIDE POPUP
+   ========================================================= */
+
+.detail-league {
+    color: var(--gold);
+    font-weight: 900;
+}
+/* =========================================================
+   TEAM NAMES INSIDE POPUP
+   ========================================================= */
+
+.detail-teams {
+    font-size: 1.45rem;
+    font-weight: 900;
+    margin: 10px 0;
+    padding-right: 45px;
+}
+
+/* =========================================================
+   DATE / TIME / STATUS INSIDE POPUP
+   ========================================================= */
+.detail-meta {
+    color: var(--muted);
+}
+/* =========================================================
+   TABLET / SMALL SCREEN LAYOUT
+   Activates when screen is 900px wide or smaller
+   ========================================================= */
+
 @media (max-width: 900px) {
-  .topbar { align-items: flex-start; flex-direction: column; }
-  .main-grid { grid-template-columns: 1fr; }
-  .league-list { max-height: 220px; }
+
+    /* Moves title/buttons onto separate rows */
+  .topbar {
+      align-items: flex-start;
+      flex-direction: column;
+  }
+    /* Moves league sidebar ABOVE calendar */
+  .main-grid {
+      grid-template-columns: 1fr;
+  }
+    /* Makes league list shorter */
+  .league-list {
+      max-height: 220px;
+  }
 }
+/* =========================================================
+   PHONE LAYOUT
+   Activates at 520px or smaller
+   ========================================================= */
+
 @media (max-width: 520px) {
-  .app-shell { width: min(100% - 18px, 1500px); padding-top: 18px; }
-  .calendar-toolbar { align-items: flex-start; }
-  .summary { font-size: .82rem; }
+
+    /* Gives website more room on tiny screens */
+  .app-shell {
+      width: min(100% - 18px, 1500px);
+      padding-top: 18px;
+  }
+    /* Calendar header alignment */
+  .calendar-toolbar {
+      align-items: flex-start;
+  }
+    /* Match count size */
+  .summary {
+      font-size: .82rem;
+  }
 }
