@@ -5,7 +5,7 @@
   const API_KEY = "0TvQnueqKa5mxJntVWt0w4LpLfEkrV1Ta8rQBb9Z";
   const LOCALE = "en-US";
   const MAX_PAGES_PER_LEAGUE = 45;
-  const STORAGE_KEY = "lol-calendar-selected-leagues-v1";
+  const STORAGE_KEY = "lol-calendar-selected-leagues-v2";
 
   const state = {
     leagues: [],
@@ -464,10 +464,11 @@
       state.selected = new Set([...restored].filter((id) => validIds.has(id)));
     }
 
-    if (!state.selected.size) {
-      const majors = state.leagues.filter(isMajor);
-      state.selected = new Set((majors.length ? majors : state.leagues.slice(0, 6)).map((l) => String(l.id)));
-    }
+      if (!state.selected.size) {
+          state.selected = new Set(
+              state.leagues.map((l) => String(l.id))
+          );
+      }
 
     saveSelection();
     renderLeagueList();
