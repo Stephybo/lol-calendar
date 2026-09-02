@@ -684,19 +684,29 @@
     renderLeagueList();
     loadSchedule();
   });
+    // ==============================
+// MATCH DIALOG CLOSE
+// ==============================
+
+    function closeMatchDialog() {
+        ui.dialog.close();
+
+        // Stop checking live scores after the popup is closed
+        if (liveScoreTimer) {
+            clearInterval(liveScoreTimer);
+            liveScoreTimer = null;
+        }
+    }
+
+// Close when the X button is clicked
+    ui.dialogClose.addEventListener("click", closeMatchDialog);
+
+// Close when clicking outside the popup
     ui.dialog.addEventListener("click", (event) => {
         if (event.target === ui.dialog) {
-            ui.dialog.close();
-
-            if (liveScoreTimer) {
-                clearInterval(liveScoreTimer);
-                liveScoreTimer = null;
-            }
+            closeMatchDialog();
         }
     });
-  ui.dialog.addEventListener("click", (event) => {
-    if (event.target === ui.dialog) ui.dialog.close();
-  });
 
   try {
     ui.timezone.textContent = Intl.DateTimeFormat().resolvedOptions().timeZone || "Local time";
