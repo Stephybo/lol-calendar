@@ -589,11 +589,21 @@ dialog::backdrop {
    POPUP X / CLOSE BUTTON
    ========================================================= */
 
-.dialog-close {
-    float: right;
-    width: 42px;
+#closeDialog {
+
+
+    width: 40px;
+    height: 40px;
+    min-height: 40px;
+
     padding: 0;
-    font-size: 1.3rem;
+
+    font-size: 2rem;
+    line-height: 1;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 /* =========================================================
@@ -802,4 +812,14 @@ dialog::backdrop {
         border-color: var(--gold);
         color: var(--gold);
     }
+}
+.match.past-match,
+.day-match-item.past-match {
+    opacity: 0.38;
+    filter: saturate(0.45);
+}
+
+.match.past-match:hover,
+.day-match-item.past-match:hover {
+    opacity: 0.55;
 }
